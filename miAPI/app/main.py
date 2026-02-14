@@ -1,5 +1,5 @@
 #Zona de Importaciones
-from fastapi import FastAPI
+from fastapi import FastAPI, status, HTTPException
 import asyncio
 from typing import Optional
 
@@ -29,13 +29,13 @@ async def hola():
         "mensaje": "!Hola Mundo FastAPI!",
         "estatus":"200"
         }
-@app.get("/v1/usuario/{id}",tags=["Parametro Obligatorio"])
+@app.get("/v1/parametroOb/{id}",tags=["Parametro Obligatorio"])
 async def consultaUno(id:int):
     return {"Se encontro usuario": id}
 
 
 
-@app.get("v1/usuarios/",tags=["Parametro Opcional"])
+@app.get("/v1/parametroOp/",tags=["Parametro Opcional"])
 async def consultaTodos(id:Optional[int]=None):
     if id is not None:
         for usuariok in usuarios:
@@ -44,3 +44,56 @@ async def consultaTodos(id:Optional[int]=None):
             return {"mensaje": "usuario no encontrado", "usuario":id}
         else:
                 return {"mensaje": "No se proporciono id"}
+
+
+
+@app.get("/v1/usuarios/",tags=["CRUD HTTP"])
+async def leer_usuarios( ):
+    return{
+        "status": "200",
+        "total": len(usuarios),
+        "usuarios":usuarios
+    }
+
+@app.post("/v1/usuarios/",tags=['CRUD HTTP'],status_code=status.HTTP_201_CREATED)
+async def crear_usuario(usuario: dict):
+    for Usr in usuarios:
+        if Usr["id"] == usuario.get("id"):
+            raise HTTPException(
+                status_code=400,
+                 detail="El id ya existe"
+            )
+    usuarios.append(usuario)
+    return{
+        "mensaje": "Usuario agregado",
+        "usuario": usuario
+    }
+
+@app.put("/v1/usuarios/",tags=['CRUD HTTP'])
+async def actualizar_usuario(id: int, usuario: dict):
+     for Usr in usuarios:
+        if Usr["id"] == id:
+            Usr.update(usuario)
+            return {
+                "mensaje": "Usuario actualizado",
+                "usuario": Usr
+            }
+     raise HTTPException(
+        status_code=204,
+        detail="Usuario no encontrado"
+    )
+
+
+@app.delete("/v1/usuarios/",tags=['CRUD HTTP'])
+async def eliminar_usuario(id: int):
+    for usuario in usuarios:
+        if usuario["id"] == id:
+            usuarios.remove(usuario)
+            return {
+                "mensaje": "Usuario eliminado",
+                "usuario": usuario
+            }
+    raise HTTPException(
+        status_code=204,
+        detail="Usuario no encontrado"
+    )
