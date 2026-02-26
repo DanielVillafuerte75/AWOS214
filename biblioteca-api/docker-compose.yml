@@ -1,0 +1,8 @@
+services:
+  api:
+    build: .
+    container_name: biblioteca-api
+    ports:
+      - "8000:8000"  # Puerto diferente al de tu otro proyecto
+    volumes:
+      - ./app:/app
