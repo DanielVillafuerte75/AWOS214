@@ -1,0 +1,7 @@
+services:
+  api: 
+    build: . 
+    container_name: TicketsSopTec
+    ports: []
+    volumes:
+      - .:/app/app/app
